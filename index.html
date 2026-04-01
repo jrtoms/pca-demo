@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PCA Baseball Stats Explorer</title>
+    <meta
+      name="description"
+      content="A classroom-friendly baseball stats demo for sorting, comparing, and simulating player performance."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="hero-badge">Classroom Demo</p>
+          <h1>PCA Baseball Stats Explorer</h1>
+          <p class="hero-subtitle">
+            A demo built from manually entered public baseball stats to show
+            what software engineering can do.
+          </p>
+        </div>
+        <div class="hero-scoreboard">
+          <p class="scoreboard-label">Demo Focus</p>
+          <div class="scoreboard-grid">
+            <div>
+              <span>Sort</span>
+              <strong>Players</strong>
+            </div>
+            <div>
+              <span>Compare</span>
+              <strong>Stats</strong>
+            </div>
+            <div>
+              <span>Simulate</span>
+              <strong>What Ifs</strong>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-layout">
+        <section class="panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Team Snapshot</p>
+              <h2>Summary Cards</h2>
+            </div>
+          </div>
+          <div id="summaryCards" class="summary-grid"></div>
+        </section>
+
+        <section class="panel panel-spotlight">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Live Demo Tool</p>
+              <h2>What-If Batting Average Calculator</h2>
+            </div>
+            <p class="section-note">
+              Great for showing how software can instantly recalculate future
+              outcomes.
+            </p>
+          </div>
+
+          <div class="what-if-layout">
+            <form id="whatIfForm" class="what-if-form">
+              <label>
+                Player
+                <select id="whatIfPlayerSelect"></select>
+              </label>
+              <label>
+                Future at-bats
+                <input
+                  id="futureAtBats"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value="4"
+                />
+              </label>
+              <label>
+                Future hits
+                <input
+                  id="futureHits"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value="2"
+                />
+              </label>
+              <p id="whatIfMessage" class="form-message" aria-live="polite"></p>
+            </form>
+
+            <div id="whatIfResults" class="what-if-results"></div>
+          </div>
+        </section>
+
+        <section class="panel dual-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Head To Head</p>
+              <h2>Compare Two Players</h2>
+            </div>
+          </div>
+
+          <div class="compare-controls">
+            <label>
+              Player One
+              <select id="compareLeftSelect"></select>
+            </label>
+            <label>
+              Player Two
+              <select id="compareRightSelect"></select>
+            </label>
+          </div>
+
+          <div id="comparePanel" class="compare-panel"></div>
+        </section>
+
+        <section class="panel analytics-grid">
+          <div class="table-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Sortable Data</p>
+                <h2>Player Table</h2>
+              </div>
+              <p class="section-note">
+                Click any column header to sort ascending or descending.
+              </p>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th><button type="button" class="sort-button" data-key="name">Name</button></th>
+                    <th><button type="button" class="sort-button" data-key="gp">GP</button></th>
+                    <th><button type="button" class="sort-button" data-key="pa">PA</button></th>
+                    <th><button type="button" class="sort-button" data-key="ab">AB</button></th>
+                    <th><button type="button" class="sort-button" data-key="h">H</button></th>
+                    <th><button type="button" class="sort-button" data-key="avg">AVG</button></th>
+                    <th><button type="button" class="sort-button" data-key="obp">OBP</button></th>
+                    <th><button type="button" class="sort-button" data-key="slg">SLG</button></th>
+                    <th><button type="button" class="sort-button" data-key="ops">OPS</button></th>
+                    <th><button type="button" class="sort-button" data-key="rbi">RBI</button></th>
+                    <th><button type="button" class="sort-button" data-key="sb">SB</button></th>
+                    <th><button type="button" class="sort-button" data-key="bb">BB</button></th>
+                    <th><button type="button" class="sort-button" data-key="k">K</button></th>
+                  </tr>
+                </thead>
+                <tbody id="playerTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <aside class="detail-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Player Focus</p>
+                <h2>Detail Panel</h2>
+              </div>
+            </div>
+            <div id="playerDetail"></div>
+          </aside>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Coach Mode</p>
+              <h2>Impact Score Leaderboard</h2>
+            </div>
+            <p class="section-note">
+              Impact Score = (hits x 3) + (rbi x 2) + (sb x 2) + (bb x 1) -
+              (k x 1)
+            </p>
+          </div>
+          <div id="leaderboard" class="leaderboard"></div>
+        </section>
+      </main>
+    </div>
+
+    <noscript>
+      <p class="noscript-message">
+        This demo needs JavaScript enabled to show the baseball dashboard.
+      </p>
+    </noscript>
+
+    <script id="players-fallback" type="application/json">
+      [
+        {
+          "name": "Lake Lytle",
+          "gp": 2,
+          "pa": 7,
+          "ab": 1,
+          "r": 1,
+          "h": 0,
+          "rbi": 0,
+          "bb": 4,
+          "k": 1,
+          "hbp": 1,
+          "obp": 0.833,
+          "slg": 0.0,
+          "ops": 0.833,
+          "sb": 1,
+          "avg": 0.0,
+          "fieldingPct": 1.0
+        },
+        {
+          "name": "Benton Axton",
+          "gp": null,
+          "pa": null,
+          "ab": 6,
+          "r": null,
+          "h": 2,
+          "rbi": 2,
+          "bb": null,
+          "k": null,
+          "hbp": null,
+          "obp": 0.556,
+          "slg": null,
+          "ops": null,
+          "sb": null,
+          "avg": 0.333,
+          "fieldingPct": 0.833
+        },
+        {
+          "name": "David Mobley",
+          "gp": null,
+          "pa": null,
+          "ab": 3,
+          "r": null,
+          "h": 1,
+          "rbi": null,
+          "bb": null,
+          "k": null,
+          "hbp": null,
+          "obp": 0.5,
+          "slg": null,
+          "ops": null,
+          "sb": 1,
+          "avg": 0.333,
+          "fieldingPct": 1.0
+        },
+        {
+          "name": "Braden Willis",
+          "gp": null,
+          "pa": 4,
+          "ab": 2,
+          "r": 1,
+          "h": null,
+          "rbi": null,
+          "bb": null,
+          "k": null,
+          "hbp": null,
+          "obp": 0.5,
+          "slg": null,
+          "ops": null,
+          "sb": null,
+          "avg": null,
+          "fieldingPct": null
+        },
+        {
+          "name": "Tanner Stinson",
+          "gp": null,
+          "pa": null,
+          "ab": 5,
+          "r": null,
+          "h": 1,
+          "rbi": 1,
+          "bb": null,
+          "k": null,
+          "hbp": null,
+          "obp": 0.429,
+          "slg": null,
+          "ops": null,
+          "sb": null,
+          "avg": 0.2,
+          "fieldingPct": 0.8
+        },
+        {
+          "name": "Brady Skaggs",
+          "gp": 2,
+          "pa": null,
+          "ab": null,
+          "r": null,
+          "h": null,
+          "rbi": null,
+          "bb": 1,
+          "k": 1,
+          "hbp": 2,
+          "obp": 0.5,
+          "slg": 0.2,
+          "ops": 0.7,
+          "sb": null,
+          "avg": 0.2,
+          "fieldingPct": null
+        },
+        {
+          "name": "Kellen Beale",
+          "gp": 2,
+          "pa": null,
+          "ab": null,
+          "r": null,
+          "h": null,
+          "rbi": null,
+          "bb": null,
+          "k": 3,
+          "hbp": null,
+          "obp": 0.143,
+          "slg": 0.143,
+          "ops": 0.286,
+          "sb": null,
+          "avg": null,
+          "fieldingPct": null
+        },
+        {
+          "name": "Holden St. Pierre",
+          "gp": 2,
+          "pa": 0,
+          "ab": 0,
+          "r": 1,
+          "h": 0,
+          "rbi": 0,
+          "bb": 0,
+          "k": 0,
+          "hbp": 0,
+          "obp": null,
+          "slg": null,
+          "ops": null,
+          "sb": null,
+          "avg": null,
+          "fieldingPct": null
+        }
+      ]
+    </script>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
